@@ -3,21 +3,51 @@
 
 (enable-console-print!)
 
-(println "Edits to this text should show up in your developer console.")
+(defn blank-gameboard [n]
+  (vec (repeat n (vec (repeat n :blank)))))
 
-;; define your app data so that it doesn't get over-written on reload
+(def app-state
+  (atom { :game-board   (blank-gameboard 3)
+          :game-status :active
+          :board-size  3
+          :win-length  3}))
 
-(defonce app-state (atom {:text "Hello world!"}))
+(defn reset-gameboard! [board-size]
+  (swap! app-state assoc :board-size board-size)
+  (swap! app-state assoc :game-board (blank-gameboard board-size)))
 
-(defn hello-world []
-  [:h1 (:text @app-state)])
+(defn reset-game [board-size]
+  (reset-gameboard! board-size))
 
-(reagent/render-component [hello-world]
+(defn blank-space-component [row column]
+  [:button "B"])
+
+(defn played-space-component [row column player]
+  [:button {:disabled "disabled"} player])
+
+(defn board-component-at [board row column]
+ (case (get-in board [row column])
+   :blank [blank-space-component row column]
+   :x     [played-space-component row column "X"]
+   :o     [played-space-component row column "O"]))
+
+(defn gameboard-component []
+  (let [game-board (:game-board @app-state)
+        board-size (:board-size @app-state)]
+    [:div
+     (for [row (range board-size)]
+       ^{:key row}
+       [:p
+         (for [column (range board-size)]
+           ^{:key column}
+           [board-component-at game-board row column])])]))
+
+(defn tic-tac-app []
+  [:div
+   [:h1 "Tic Tac Toe"]
+   [gameboard-component]
+   [:br]
+   [:button {:on-click #(reset-game 3)}  "new game"]])
+
+(reagent/render-component [tic-tac-app]
                           (. js/document (getElementById "app")))
-
-
-(defn on-js-reload []
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
