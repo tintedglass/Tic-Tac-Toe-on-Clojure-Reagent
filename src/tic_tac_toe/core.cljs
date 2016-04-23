@@ -12,13 +12,14 @@
 (defn blank-gameboard [n]
   (vec (repeat n (vec (repeat n :blank)))))
 
-(defonce app-state
-  (atom { :game-board   (blank-gameboard 3)
-          :game-status :active
-          :board-size (:min-board-size app-consts)
-          :win-length (:min-win-length app-consts)}))
+(def app-state
+  (let [{:keys [min-board-size min-win-length]} app-consts]
+    (atom { :game-board  (blank-gameboard min-board-size)
+            :game-status :active
+            :board-size  min-board-size
+            :win-length  min-win-length})))
 
-(defn reset-game! [board-size win-length]
+(defn reset-app-state! [board-size win-length]
   (swap! app-state assoc :board-size board-size)
   (swap! app-state assoc :win-length board-size)
   (swap! app-state assoc :game-board (blank-gameboard board-size)))
@@ -35,16 +36,14 @@
    :x     [played-space-component row column "X"]
    :o     [played-space-component row column "O"]))
 
-(defn gameboard-component []
-  (let [game-board (:game-board @app-state)
-        board-size (:board-size @app-state)]
-    [:div
-     (for [row (range board-size)]
-       ^{:key row}
-       [:p
-         (for [column (range board-size)]
-           ^{:key column}
-           [board-component-at game-board row column])])]))
+(defn gameboard-component [game-board board-size]
+  [:div
+   (for [row (range board-size)]
+     ^{:key row}
+     [:p
+       (for [column (range board-size)]
+         ^{:key column}
+         [board-component-at game-board row column])])])
 
 (defn select-component [value-atom options]
   [:select
@@ -65,13 +64,14 @@
      [:label "Win Length"
        [select-component selected-win-length (range min-win-length (inc max-win-length))]]
      [:button
-      {:on-click #(reset-game! @selected-size @selected-win-length)}  "new game"]]))
+      {:on-click #(reset-app-state! @selected-size @selected-win-length)}  "new game"]]))
 
 (defn tic-tac-app []
-  [:div
-   [:h1 "Tic Tac Toe"]
-   [gameboard-component]
-   [new-game-component]])
+  (let [{:keys [game-board board-size]} @app-state]
+    [:div
+     [:h1 "Tic Tac Toe"]
+     [gameboard-component game-board board-size]
+     [new-game-component]]))
 
 (reagent/render-component [tic-tac-app]
                           (. js/document (getElementById "app")))
