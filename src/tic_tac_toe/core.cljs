@@ -12,7 +12,7 @@
 (defn blank-gameboard [n]
   (vec (repeat n (vec (repeat n :blank)))))
 
-(def app-state
+(defonce app-state
   (let [{:keys [min-board-size min-win-length]} app-consts]
     (atom { :game-board  (blank-gameboard min-board-size)
             :game-status :active
@@ -27,14 +27,14 @@
 (defn blank-space-component [row column]
   [:button "B"])
 
-(defn played-space-component [row column player]
+(defn played-space-component [player]
   [:button {:disabled "disabled"} player])
 
 (defn board-component-at [board row column]
  (case (get-in board [row column])
    :blank [blank-space-component row column]
-   :x     [played-space-component row column "X"]
-   :o     [played-space-component row column "O"]))
+   :x     [played-space-component "X"]
+   :o     [played-space-component "O"]))
 
 (defn gameboard-component [game-board board-size]
   [:div
