@@ -24,28 +24,29 @@
   (swap! app-state assoc :win-length win-length)
   (swap! app-state assoc :game-board (blank-gameboard board-size)))
 
-(defn player-move [board row column])
+(defn player-move [row column])
 
-(defn blank-space-component [board row column]
-  [:button {:on-click #(player-move board row column)} "B"])
+(defn blank-space-component [row column]
+  [:button {:on-click #(player-move row column)} "B"])
 
 (defn played-space-component [player]
   [:button {:disabled "disabled"} player])
 
-(defn board-component-at [board row column]
- (case (get-in board [row column])
-   :blank [blank-space-component board row column]
+(defn board-component-at [game-board row column]
+ (case (get-in game-board [row column])
+   :blank [blank-space-component row column]
    :x     [played-space-component "X"]
    :o     [played-space-component "O"]))
 
-(defn gameboard-component [game-board board-size]
-  [:div
-   (for [row (range board-size)]
-     ^{:key row}
-     [:p
-       (for [column (range board-size)]
-         ^{:key column}
-         [board-component-at game-board row column])])])
+(defn gameboard-component []
+  (let [{:keys [game-board board-size]} @app-state]
+    [:div
+     (for [row (range board-size)]
+       ^{:key row}
+       [:p
+         (for [column (range board-size)]
+           ^{:key column}
+           [board-component-at game-board row column])])]))
 
 (defn select-component [value-atom options]
   [:select
@@ -69,19 +70,19 @@
       {:on-click #(reset-app-state! @selected-size @selected-win-length)}  "new game"]]))
 
 (defn status-component [game-status]
-  (case game-status
-    :x-wins [:p "X Wins!"]
-    :o-wins [:p "O Wins!"]
-    :draw   [:p "Draw"]
-    :active [:p "Game On"]))
+  (let [{:keys [game-status]} @app-state]
+    (case game-status
+      :x-wins [:p "X Wins!"]
+      :o-wins [:p "O Wins!"]
+      :draw   [:p "Draw"]
+      :active [:p "Game On"])))
 
 (defn tic-tac-app []
-  (let [{:keys [game-board board-size game-status]} @app-state]
-    [:div
-     [:h1 "Tic Tac Toe"]
-     [status-component game-status]
-     [gameboard-component game-board board-size]
-     [new-game-component]]))
+  [:div
+   [:h1 "Tic Tac Toe"]
+   [status-component]
+   [gameboard-component]
+   [new-game-component]])
 
 (reagent/render-component [tic-tac-app]
                           (. js/document (getElementById "app")))
