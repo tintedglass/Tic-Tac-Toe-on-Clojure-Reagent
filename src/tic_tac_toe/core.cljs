@@ -21,18 +21,20 @@
 
 (defn reset-app-state! [board-size win-length]
   (swap! app-state assoc :board-size board-size)
-  (swap! app-state assoc :win-length board-size)
+  (swap! app-state assoc :win-length win-length)
   (swap! app-state assoc :game-board (blank-gameboard board-size)))
 
-(defn blank-space-component [row column]
-  [:button "B"])
+(defn player-move [board row column])
+
+(defn blank-space-component [board row column]
+  [:button {:on-click #(player-move board row column)} "B"])
 
 (defn played-space-component [player]
   [:button {:disabled "disabled"} player])
 
 (defn board-component-at [board row column]
  (case (get-in board [row column])
-   :blank [blank-space-component row column]
+   :blank [blank-space-component board row column]
    :x     [played-space-component "X"]
    :o     [played-space-component "O"]))
 
@@ -66,10 +68,18 @@
      [:button
       {:on-click #(reset-app-state! @selected-size @selected-win-length)}  "new game"]]))
 
+(defn status-component [game-status]
+  (case game-status
+    :x-wins [:p "X Wins!"]
+    :o-wins [:p "O Wins!"]
+    :draw   [:p "Draw"]
+    :active [:p "Game On"]))
+
 (defn tic-tac-app []
-  (let [{:keys [game-board board-size]} @app-state]
+  (let [{:keys [game-board board-size game-status]} @app-state]
     [:div
      [:h1 "Tic Tac Toe"]
+     [status-component game-status]
      [gameboard-component game-board board-size]
      [new-game-component]]))
 
