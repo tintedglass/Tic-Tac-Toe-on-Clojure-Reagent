@@ -16,6 +16,7 @@
   (let [{:keys [min-board-size min-win-length]} app-consts]
     (atom { :game-board  (blank-gameboard min-board-size)
             :game-status :active
+
             :board-size  min-board-size
             :win-length  min-win-length})))
 
@@ -24,17 +25,22 @@
   (swap! app-state assoc :win-length win-length)
   (swap! app-state assoc :game-board (blank-gameboard board-size)))
 
-(defn player-move [row column])
+(defn update-board! [new-game-board]
+  (swap! app-state assoc :game-board new-game-board))
 
-(defn blank-space-component [row column]
-  [:button {:on-click #(player-move row column)} "B"])
+(defn player-move [game-board row column]
+  (let [new-board (assoc-in game-board [row column] :x)]
+    (update-board! new-board)))
+
+(defn blank-space-component [game-board row column]
+  [:button {:on-click #(player-move game-board row column)} "B"])
 
 (defn played-space-component [player]
   [:button {:disabled "disabled"} player])
 
 (defn board-component-at [game-board row column]
  (case (get-in game-board [row column])
-   :blank [blank-space-component row column]
+   :blank [blank-space-component game-board row column]
    :x     [played-space-component "X"]
    :o     [played-space-component "O"]))
 
