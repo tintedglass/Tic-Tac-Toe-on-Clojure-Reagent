@@ -4,19 +4,19 @@
 (enable-console-print!)
 
 (def app-consts
-  { :min-board-size 3
-    :max-board-size 9
-    :min-win-length 3
-    :max-win-length 7})
+  {:min-board-size 3
+   :max-board-size 9
+   :min-win-length 3
+   :max-win-length 7})
 
 (defn blank-board [n]
   (vec (repeat n (vec (repeat n :blank)))))
 
 (defonce app-state
   (let [{:keys [min-board-size min-win-length]} app-consts]
-    (atom { :board  (blank-board min-board-size)
-            :game-status :active
-            :win-length  min-win-length})))
+    (atom {:board  (blank-board min-board-size)
+           :game-status :active
+           :win-length  min-win-length})))
 
 (defn update-board! [new-board new-game-status]
   (swap! app-state assoc :board new-board)
