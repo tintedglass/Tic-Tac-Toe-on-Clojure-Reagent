@@ -9,25 +9,25 @@
     :min-win-length 3
     :max-win-length 7})
 
-(defn blank-gameboard [n]
+(defn blank-board [n]
   (vec (repeat n (vec (repeat n :blank)))))
 
 (defonce app-state
   (let [{:keys [min-board-size min-win-length]} app-consts]
-    (atom { :game-board  (blank-gameboard min-board-size)
+    (atom { :board  (blank-board min-board-size)
             :game-status :active
 
             :board-size  min-board-size
             :win-length  min-win-length})))
 
-(defn update-board! [new-game-board new-game-status]
-  (swap! app-state assoc :game-board new-game-board)
+(defn update-board! [new-board new-game-status]
+  (swap! app-state assoc :board new-board)
   (swap! app-state assoc :game-status new-game-status))
 
 (defn reset-app-state! [board-size win-length]
   (swap! app-state assoc :board-size board-size)
   (swap! app-state assoc :win-length win-length)
-  (update-board! (blank-gameboard board-size) :active))
+  (update-board! (blank-board board-size) :active))
 
 (defn wins? [player]
   false)
@@ -35,39 +35,39 @@
 (defn draw? []
   false)
 
-(defn determine-game-status [game-board]
+(defn determine-game-status [board]
   (cond
     (wins? :x) :x-wins
     (wins? :o) :o-wins
     (draw?)    :draw
     :else      :active))
 
-(defn player-move [game-board row column]
-  (let [new-board (assoc-in game-board [row column] :x)
+(defn player-move [board row column]
+  (let [new-board (assoc-in board [row column] :x)
         new-game-status (determine-game-status new-board)]
     (update-board! new-board new-game-status)))
 
-(defn blank-space-component [game-board row column]
-  [:button {:on-click #(player-move game-board row column)} "B"])
+(defn blank-space-component [board row column]
+  [:button {:on-click #(player-move board row column)} "B"])
 
 (defn played-space-component [player]
   [:button {:disabled "disabled"} player])
 
-(defn board-component-at [game-board row column]
- (case (get-in game-board [row column])
-   :blank [blank-space-component game-board row column]
+(defn board-component-at [board row column]
+ (case (get-in board [row column])
+   :blank [blank-space-component board row column]
    :x     [played-space-component "X"]
    :o     [played-space-component "O"]))
 
 (defn gameboard-component []
-  (let [{:keys [game-board board-size]} @app-state]
+  (let [{:keys [board board-size]} @app-state]
     [:div
      (for [row (range board-size)]
        ^{:key row}
        [:p
          (for [column (range board-size)]
            ^{:key column}
-           [board-component-at game-board row column])])]))
+           [board-component-at board row column])])]))
 
 (defn select-component [value-atom options]
   [:select
