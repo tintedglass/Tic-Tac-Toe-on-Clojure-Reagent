@@ -39,9 +39,9 @@
 
 (defn start-of-n-length-run? [board position n player]
   (let [[row column] position]
-    (some true?
+    (some true? ; Is position the start of at least one run of length n?
       (for [[delta-row delta-column] [[0 1] [1 0] [1 1] [1 -1]]]
-        (every? true?
+        (every? true? ; Check down, right, and both downward diagonals for runs.
           (for [i (range n)]
             (=
               (get-in board [(+ (* delta-row i) row) (+ (* delta-column i) column)])
@@ -59,20 +59,30 @@
   (cond
     (wins? board win-length :x) :x-wins
     (wins? board win-length :o) :o-wins
-    (draw? board)    :draw
-    :else      :active))
+    (draw? board)               :draw
+    :else                       :active))
+
+(defn cpu-move [board win-length]
+  (let [[row column] (rand-nth (board-spaces-of-type board :blank))
+        new-board (assoc-in board [row column] :o)
+        new-game-status (determine-game-status new-board win-length)]
+    (update-board! new-board new-game-status)))
 
 (defn player-move [board row column win-length]
   (let [new-board (assoc-in board [row column] :x)
         new-game-status (determine-game-status new-board win-length)]
-    (update-board! new-board new-game-status)))
-
-(defn blank-space-component [row column]
-  (let [{:keys [board win-length]} @app-state]
-    [:button {:on-click #(player-move board row column win-length)} "B"]))
+    (update-board! new-board new-game-status)
+    (if (= new-game-status :active)
+      (cpu-move new-board win-length))))
 
 (defn played-space-component [player]
   [:button {:disabled "disabled"} player])
+
+(defn blank-space-component [row column]
+  (let [{:keys [board win-length game-status]} @app-state]
+    (if (= game-status :active)
+      [:button {:on-click #(player-move board row column win-length)} "B"]
+      (played-space-component "B"))))
 
 (defn board-component-at [board row column]
  (case (get-in board [row column])
