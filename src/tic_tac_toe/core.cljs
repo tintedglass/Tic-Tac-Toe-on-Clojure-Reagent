@@ -29,33 +29,54 @@
   (swap! app-state assoc :win-length win-length)
   (update-board! (blank-board board-size) :active))
 
-(defn wins? [player]
-  false)
+(defn board-positions [board-size]
+  (for [x (range board-size) y (range board-size)] [x y]))
 
-(defn draw? []
-  false)
+(defn board-spaces-of-type [board type]
+  (let [board-size (count board)
+        positions (board-positions board-size)]
+     (filter #(= type (get-in board %)) positions)))
 
-(defn determine-game-status [board]
+(defn start-of-n-length-run? [board position n player]
+  (let [[row column] position]
+    (some true?
+      (for [[delta-row delta-column] [[0 1] [1 0] [1 1] [1 -1]]]
+        (every? true?
+          (for [i (range n)]
+            (=
+              (get-in board [(+ (* delta-row i) row) (+ (* delta-column i) column)])
+              player)))))))
+
+(defn wins? [board win-length player]
+  (let [player-positions (board-spaces-of-type board player)]
+    (some true?
+      (map #(start-of-n-length-run? board % win-length player) player-positions))))
+
+(defn draw? [board]
+  (empty? (board-spaces-of-type board :blank)))
+
+(defn determine-game-status [board win-length]
   (cond
-    (wins? :x) :x-wins
-    (wins? :o) :o-wins
-    (draw?)    :draw
+    (wins? board win-length :x) :x-wins
+    (wins? board win-length :o) :o-wins
+    (draw? board)    :draw
     :else      :active))
 
-(defn player-move [board row column]
+(defn player-move [board row column win-length]
   (let [new-board (assoc-in board [row column] :x)
-        new-game-status (determine-game-status new-board)]
+        new-game-status (determine-game-status new-board win-length)]
     (update-board! new-board new-game-status)))
 
-(defn blank-space-component [board row column]
-  [:button {:on-click #(player-move board row column)} "B"])
+(defn blank-space-component [row column]
+  (let [{:keys [board win-length]} @app-state]
+    [:button {:on-click #(player-move board row column win-length)} "B"]))
 
 (defn played-space-component [player]
   [:button {:disabled "disabled"} player])
 
 (defn board-component-at [board row column]
  (case (get-in board [row column])
-   :blank [blank-space-component board row column]
+   :blank [blank-space-component row column]
    :x     [played-space-component "X"]
    :o     [played-space-component "O"]))
 
