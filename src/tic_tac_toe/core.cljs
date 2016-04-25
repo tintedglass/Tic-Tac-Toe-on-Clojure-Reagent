@@ -16,8 +16,6 @@
   (let [{:keys [min-board-size min-win-length]} app-consts]
     (atom { :board  (blank-board min-board-size)
             :game-status :active
-
-            :board-size  min-board-size
             :win-length  min-win-length})))
 
 (defn update-board! [new-board new-game-status]
@@ -25,7 +23,6 @@
   (swap! app-state assoc :game-status new-game-status))
 
 (defn reset-app-state! [board-size win-length]
-  (swap! app-state assoc :board-size board-size)
   (swap! app-state assoc :win-length win-length)
   (update-board! (blank-board board-size) :active))
 
@@ -43,9 +40,8 @@
       (for [[delta-row delta-column] [[0 1] [1 0] [1 1] [1 -1]]]
         (every? true? ; Check down, right, and both downward diagonals for runs.
           (for [i (range n)]
-            (=
-              (get-in board [(+ (* delta-row i) row) (+ (* delta-column i) column)])
-              player)))))))
+            (= (get-in board [(+ (* delta-row i) row) (+ (* delta-column i) column)])
+               player)))))))
 
 (defn wins? [board win-length player]
   (let [player-positions (board-spaces-of-type board player)]
@@ -91,7 +87,8 @@
    :o     [played-space-component "O"]))
 
 (defn gameboard-component []
-  (let [{:keys [board board-size]} @app-state]
+  (let [{:keys [board]} @app-state
+        board-size (count board)]
     [:div
      (for [row (range board-size)]
        ^{:key row}
