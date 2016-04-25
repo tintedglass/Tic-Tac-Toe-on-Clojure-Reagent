@@ -20,17 +20,32 @@
             :board-size  min-board-size
             :win-length  min-win-length})))
 
+(defn update-board! [new-game-board new-game-status]
+  (swap! app-state assoc :game-board new-game-board)
+  (swap! app-state assoc :game-status new-game-status))
+
 (defn reset-app-state! [board-size win-length]
   (swap! app-state assoc :board-size board-size)
   (swap! app-state assoc :win-length win-length)
-  (swap! app-state assoc :game-board (blank-gameboard board-size)))
+  (update-board! (blank-gameboard board-size) :active))
 
-(defn update-board! [new-game-board]
-  (swap! app-state assoc :game-board new-game-board))
+(defn wins? [player]
+  false)
+
+(defn draw? []
+  false)
+
+(defn determine-game-status [game-board]
+  (cond
+    (wins? :x) :x-wins
+    (wins? :o) :o-wins
+    (draw?)    :draw
+    :else      :active))
 
 (defn player-move [game-board row column]
-  (let [new-board (assoc-in game-board [row column] :x)]
-    (update-board! new-board)))
+  (let [new-board (assoc-in game-board [row column] :x)
+        new-game-status (determine-game-status new-board)]
+    (update-board! new-board new-game-status)))
 
 (defn blank-space-component [game-board row column]
   [:button {:on-click #(player-move game-board row column)} "B"])
