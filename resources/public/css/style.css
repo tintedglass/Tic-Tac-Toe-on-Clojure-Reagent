@@ -17,14 +17,12 @@
 .board {
   margin-bottom: 15px;
 }
-
-.board p {
-  margin: 0 0 10px 0;
-}
-
-.board button {
-  width: 50px;
-  height: 50px;
-  font-size: 30px;
-  margin-right: 10px;
-}
+  .board p {
+    margin: 0 0 10px 0;
+  }
+  .board button {
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
+    margin-right: 10px;
+  }
