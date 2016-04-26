@@ -77,8 +77,8 @@
 (defn blank-space-component [row column]
   (let [{:keys [board win-length game-status]} @app-state]
     (if (= game-status :active)
-      [:button {:on-click #(player-move board row column win-length)} "B"]
-      (played-space-component "B"))))
+      [:button {:on-click #(player-move board row column win-length)} "_"]
+      (played-space-component "_"))))
 
 (defn board-component-at [board row column]
  (case (get-in board [row column])
@@ -89,7 +89,7 @@
 (defn gameboard-component []
   (let [{:keys [board]} @app-state
         board-size (count board)]
-    [:div
+    [:div.board
      (for [row (range board-size)]
        ^{:key row}
        [:p
