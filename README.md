@@ -34,6 +34,12 @@ Based on my constraint from yesterday about function purity the `blank-space-com
 
 After either player or cpu moves the board must be checked for a win/draw, which means another possible mutation to the game status in the app state.
 
+**April 25, 2016**
+
+Completed the CPU player. Simplified the app state by removing board size from the app-state atom. Successfully implemented all non-component functions without resorting to accessing or mutating global state. Triggering cpu moves at the end of the player move function feels awkward. Surely there's a way to make a non-component function that re-runs based on a reagent reactions. If so, the CPU player function could be triggered based on a change to the game-status app state.
+
+Am going to redevelop this code in a simplified manner for a 3x3 board only.
+
 ## Setup
 
 To get an interactive development environment run:
