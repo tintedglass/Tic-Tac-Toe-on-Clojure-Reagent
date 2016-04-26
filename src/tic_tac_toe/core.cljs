@@ -89,7 +89,7 @@
 (defn gameboard-component []
   (let [{:keys [board]} @app-state
         board-size (count board)]
-    [:div
+    [:div.board
      (for [row (range board-size)]
        ^{:key row}
        [:p
