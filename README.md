@@ -4,6 +4,8 @@ Tic tac toe built using Clojurescript and Reagent. Coded using vim and figwheel.
 
 [Play the game here](https://stungeye.github.io/Tic-Tac-Toe-on-Clojure-Reagent/).
 
+This codebase supports variable board sizes and win lengths. [A simpler 3x3-only version of the game is also available](https://github.com/stungeye/Simpler-Tic-Tac-Toe-on-Clojure-Reagent).
+
 ## Build Log
 
 **April 22, 2016**
